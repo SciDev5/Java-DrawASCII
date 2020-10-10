@@ -2,12 +2,12 @@ package me.scidev5.drawASCII;
 
 public class CharInfo {
 
-    public static final CharInfo CHAR_SPACE =      new CharInfo(' ',0.1f);
-    public static final CharInfo CHAR_HASHTAG =    new CharInfo('#',0.8f);
-    public static final CharInfo CHAR_MINUS =      new CharInfo('-',0.3f,0f,0f, 1f,0f);
+    public static final CharInfo CHAR_SPACE =      new CharInfo(' ',0.05f);
+    public static final CharInfo CHAR_HASHTAG =    new CharInfo('#',0.95f);
+    public static final CharInfo CHAR_MINUS =      new CharInfo('-',0.4f,0f,0f, 1f,0f);
     public static final CharInfo CHAR_PERIOD =     new CharInfo('.',0.3f,0f,-0.9f);
-    public static final CharInfo CHAR_ASTERISK =   new CharInfo('*',0.5f);
-    public static final CharInfo CHAR_PLUS =       new CharInfo('+',0.4f);
+    public static final CharInfo CHAR_ASTERISK =   new CharInfo('*',0.8f);
+    public static final CharInfo CHAR_PLUS =       new CharInfo('+',0.6f);
     public static final CharInfo CHAR_SLASH_FWD =  new CharInfo('/',0.6f,0f,0f, 1f, 1f);
     public static final CharInfo CHAR_SLACK_BK =   new CharInfo('\\',0.6f,0f,0f, 1f, -1f);
     public static final CharInfo CHAR_QUOT =       new CharInfo('\'',0.3f,0f,0.9f);
@@ -59,7 +59,7 @@ public class CharInfo {
         float signedY = 2*y-1;
         float anisotropy = 1 - Math.abs(signedX*anisotropicY - signedY*anisotropicX);
         float focus = signedX*focusX + signedY*focusY;
-        return Math.min(1,Math.max(0, anisotropy * (focus + density)));
+        return Math.min(1,Math.max(0, anisotropy * (focus + 1) * density));
     }
 
     /**
@@ -73,7 +73,7 @@ public class CharInfo {
             for (int j = 0; j < data[i].length; j++) {
                 float x = data.length > 1 ? i / (data.length - 1f) : 0.5f;
                 float y = data[i].length > 1 ? j / (data[i].length - 1f) : 0.5f;
-                sum += Math.abs(1 - data[i][j] / 255f - this.sample(x,y));
+                sum += Math.abs(1 - data[i][j] - this.sample(x,1-y));
                 amount++;
             }
         }

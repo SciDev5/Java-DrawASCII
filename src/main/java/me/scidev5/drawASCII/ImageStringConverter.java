@@ -9,7 +9,7 @@ public class ImageStringConverter {
 
     private BufferedImage image;
     private int sampleWidth = 8;
-    private int sampleHeight = 8;
+    private int sampleHeight = 16;
 
     public ImageStringConverter(@NotNull BufferedImage image) {
         this.image = image;
@@ -22,7 +22,6 @@ public class ImageStringConverter {
         char bestMatch = 'x'; float bestValue = Float.POSITIVE_INFINITY;
         for (CharInfo info : chars) {
             float value = info.test(luminosityMap);
-            System.out.println(info.character + ": "+value+" vs "+bestValue);
             if (value < bestValue) {
                 bestMatch = info.character;
                 bestValue = value;
