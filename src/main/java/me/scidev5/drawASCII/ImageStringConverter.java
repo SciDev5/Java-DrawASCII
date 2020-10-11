@@ -7,20 +7,24 @@ import java.awt.image.BufferedImage;
 
 public class ImageStringConverter {
 
-    private BufferedImage image;
+    private final BufferedImage image;
     private int sampleWidth = 8;
     private int sampleHeight = 16;
+    private CharInfo[] charset = CharInfo.getArray();
 
     public ImageStringConverter(@NotNull BufferedImage image) {
         this.image = image;
     }
 
+    public void setCharset(@NotNull CharInfo[] charset) {
+        this.charset = charset;
+    }
+
     private char calculateAt(int i, int j) {
         double[][] luminosityMap = ImageUtils.toLuminanceMap(ImageUtils.getRGBMap(image,i*sampleWidth,j*sampleHeight,sampleWidth,sampleHeight));
 
-        CharInfo[] chars = CharInfo.getArray();
         char bestMatch = 'x'; float bestValue = Float.POSITIVE_INFINITY;
-        for (CharInfo info : chars) {
+        for (CharInfo info : charset) {
             float value = info.test(luminosityMap);
             if (value < bestValue) {
                 bestMatch = info.character;
