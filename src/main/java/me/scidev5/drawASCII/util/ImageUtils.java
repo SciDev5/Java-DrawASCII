@@ -123,4 +123,21 @@ public class ImageUtils {
         }
         return map;
     }
+
+    /**
+     * Isolate a channel of an RGB map.
+     * @param rgbMap The RGB map to use.
+     * @param channel The channel to use (-1: alpha; 0-2: rgb)
+     * @return A 2-dimensional array of values for the specified channel.
+     */
+    public static double[][] isolateRGBMapChannel(int[][] rgbMap, int channel) {
+        if (rgbMap.length == 0) return new double[0][0];
+        double[][] map = new double[rgbMap.length][rgbMap[0].length];
+        for (int i = 0; i < rgbMap.length; i++) {
+            if (rgbMap[i].length != rgbMap[0].length) return new double[0][0];
+            for (int j = 0; j < rgbMap[i].length; j++)
+                map[i][j] = ((rgbMap[i][j] >> (8 * (2-channel))) & 0xff) / 255.0;
+        }
+        return map;
+    }
 }

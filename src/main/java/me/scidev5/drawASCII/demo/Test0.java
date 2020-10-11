@@ -1,38 +1,45 @@
 package me.scidev5.drawASCII.demo;
 
-import me.scidev5.drawASCII.CharInfo;
+import me.scidev5.drawASCII.charInfo.CharInfoHumanMade;
 import me.scidev5.drawASCII.ImageStringConverter;
 import me.scidev5.drawASCII.StringImageConverter;
-import me.scidev5.drawASCII.util.ImageUtils;
+import me.scidev5.drawASCII.util.FontUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 
 public class Test0 {
 
     //*
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, FontFormatException {
         String imgName = "/doggo_smol.jpg";
         //String imgName = "/testimg.png";
         URL doggoImgFileURL = Test0.class.getResource(imgName);
         System.out.println("IMAGE: "+doggoImgFileURL);
         BufferedImage doggoImg = ImageIO.read(doggoImgFileURL);
 
+        FontUtils.loadFont("scp",Font.TRUETYPE_FONT,Test0.class.getResource("/fonts/sourcecodepro/SourceCodePro-Black.ttf"));
+        FontUtils.deriveFont("scp",32f);
+        Font font = FontUtils.getFont("scp:32.00px");
+        System.out.println(FontUtils.getFont("scp:32.00px"));
+
         ImageStringConverter iscDoggo = new ImageStringConverter(doggoImg);
-        CharInfo[] charset = CharInfo.buildCharsetInfo(StringImageConverter.fixedsys," :ABCDEFGHIJKLMNOPQRSTUVWXYZ#*+-.,'/\"|".toCharArray(),7f);
-        for (CharInfo charInfo : charset)
-            System.out.println(charInfo);
+
+        CharInfoHumanMade[] charset = CharInfoHumanMade.getSimpleCharset();
+        //for (CharInfo charInfo : charset) System.out.println(charInfo);
+
         iscDoggo.setCharset(charset);
+        iscDoggo.setMode(ImageStringConverter.CalculateMode.RGB);
 
-        String str = iscDoggo.toString();
-        System.out.println(str);
+        String[] strs = iscDoggo.toStringArr();
+        System.out.println(strs[0]);
 
-
-        StringImageConverter sicTest = new StringImageConverter(str);
+        StringImageConverter sicTest = new StringImageConverter(strs[0],strs[1],strs[2]);
+        sicTest.setFont(font);
 
         BufferedImage image = sicTest.toImage();
         ImageIO.write(image,"png", new File("out.png"));
