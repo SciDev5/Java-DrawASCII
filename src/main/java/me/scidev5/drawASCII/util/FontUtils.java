@@ -18,12 +18,13 @@ public class FontUtils {
             loadedFonts.put(id,font);
     }
 
-    public static Font deriveFont(String id, float size) {
+    public static String deriveFont(String id, float size) {
         Font rawFont = loadedFonts.get(id);
         if (rawFont == null) return null;
         Font derivedFont = rawFont.deriveFont(size);
-        loadedFonts.put(String.format("%s:%.2fpx",id,size),derivedFont);
-        return derivedFont;
+        String newId = String.format("%s:%.2fpx",id,size);
+        loadedFonts.put(newId,derivedFont);
+        return newId;
     }
     public static Font getFont(String id) {
         return loadedFonts.get(id);

@@ -37,6 +37,7 @@ public class ImageStringConverter {
         if (height <= 0) throw new IllegalArgumentException("Height must be greater than 0!");
         sampleWidth = width;
         sampleHeight = height;
+        for (CharInfo info : charset) info.cache(width,height);
     }
 
     private char calculateAt(int i, int j, double[][] map) {

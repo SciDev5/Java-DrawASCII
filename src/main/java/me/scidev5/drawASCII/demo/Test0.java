@@ -23,9 +23,7 @@ public class Test0 {
         BufferedImage doggoImg = ImageIO.read(doggoImgFileURL);
 
         FontUtils.loadFont("scp",Font.TRUETYPE_FONT,Test0.class.getResource("/fonts/sourcecodepro/SourceCodePro-Black.ttf"));
-        FontUtils.deriveFont("scp",32f);
-        Font font = FontUtils.getFont("scp:32.00px");
-        System.out.println(FontUtils.getFont("scp:32.00px"));
+        Font font = FontUtils.getFont(FontUtils.deriveFont("scp",8f));
 
         ImageStringConverter iscDoggo = new ImageStringConverter(doggoImg);
 

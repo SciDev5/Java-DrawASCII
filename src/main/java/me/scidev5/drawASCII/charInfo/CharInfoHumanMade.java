@@ -57,12 +57,17 @@ public class CharInfoHumanMade implements CharInfo {
         this.anisotropicY = anisotropicY;
     }
 
-    private float sample(float x, float y) {
-        float signedX = 2*x-1;
-        float signedY = 2*y-1;
-        float anisotropy = 1 - Math.abs(signedX*anisotropicY - signedY*anisotropicX);
-        float focus = signedX*focusX + signedY*focusY;
+    private float sample(int i, int j, int li, int lj) {
+        float x = li > 1 ? i / (li - 1f) * 2 - 1 : 0f;
+        float y = lj > 1 ? j / (lj - 1f) * 2 - 1 : 0f;
+        float anisotropy = 1 - Math.abs(x*anisotropicY - y*anisotropicX);
+        float focus = x*focusX + y*focusY;
         return Math.min(1,Math.max(0, anisotropy * (focus + 1) * density));
+    }
+    private float sampleCache(int i, int j, int li, int lj) {
+        if (li == 0 || lj == 0) return 0f;
+        if (cachedWidth != li || cachedHeight != lj) this.cache(li,lj);
+        return this.cache[i][j];
     }
 
     /**
@@ -75,18 +80,23 @@ public class CharInfoHumanMade implements CharInfo {
         int amount = 0; float sum = 0;
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
-                float x = data.length > 1 ? i / (data.length - 1f) : 0.5f;
-                float y = data[i].length > 1 ? j / (data[i].length - 1f) : 0.5f;
-                sum += Math.abs(data[i][j] - this.sample(x,1-y));
+                sum += Math.abs(data[i][j] - this.sampleCache(i,j,data.length,data[i].length));
                 amount++;
             }
         }
         return amount > 0 ? sum/amount : Float.POSITIVE_INFINITY;
     }
 
+    int cachedWidth = 0; int cachedHeight = 0;
+    float[][] cache = null;
     @Override
     public void cache(int w, int h) {
-        // TODO
+        if (cachedWidth == w && cachedHeight == h) return;
+        cachedWidth = w; cachedHeight = h;
+        this.cache = new float[w][h];
+        for (int i = 0; i < w; i++)
+            for (int j = 0; j < h; j++)
+                cache[i][j] = this.sample(i,j,w,h);
     }
 
     @Override
