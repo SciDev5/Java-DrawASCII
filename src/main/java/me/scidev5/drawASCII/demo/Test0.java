@@ -1,6 +1,7 @@
 package me.scidev5.drawASCII.demo;
 
-import me.scidev5.drawASCII.charInfo.CharInfoHumanMade;
+import me.scidev5.drawASCII.charInfo.CharInfo;
+import me.scidev5.drawASCII.charInfo.CharInfoFontMade;
 import me.scidev5.drawASCII.ImageStringConverter;
 import me.scidev5.drawASCII.StringImageConverter;
 import me.scidev5.drawASCII.util.FontUtils;
@@ -23,20 +24,22 @@ public class Test0 {
         BufferedImage doggoImg = ImageIO.read(doggoImgFileURL);
 
         FontUtils.loadFont("scp",Font.TRUETYPE_FONT,Test0.class.getResource("/fonts/sourcecodepro/SourceCodePro-Black.ttf"));
-        Font font = FontUtils.getFont(FontUtils.deriveFont("scp",8f));
+        Font font = FontUtils.getFont(FontUtils.deriveFont("scp",12f));
 
         ImageStringConverter iscDoggo = new ImageStringConverter(doggoImg);
 
-        CharInfoHumanMade[] charset = CharInfoHumanMade.getSimpleCharset();
+        CharInfo[] charset = CharInfoFontMade.buildCharsetForFont(font," -*#%^.,'\":~|\\/+=<>".toCharArray(), 1.8f, 0.3f);
         //for (CharInfo charInfo : charset) System.out.println(charInfo);
 
         iscDoggo.setCharset(charset);
         iscDoggo.setMode(ImageStringConverter.CalculateMode.RGB);
+        iscDoggo.setSampleDimensions(16,32);
 
         String[] strs = iscDoggo.toStringArr();
-        System.out.println(strs[0]);
 
-        StringImageConverter sicTest = new StringImageConverter(strs[0],strs[1],strs[2]);
+        //System.out.println(strs[0]);
+
+        StringImageConverter sicTest = new StringImageConverter(strs[0],strs[1],strs[2], true);
         sicTest.setFont(font);
 
         BufferedImage image = sicTest.toImage();

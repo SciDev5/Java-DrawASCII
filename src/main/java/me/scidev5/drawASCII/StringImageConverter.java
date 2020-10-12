@@ -18,24 +18,31 @@ public class StringImageConverter {
     private Color colorBG;
     private Color[] colorFG;
 
+    private boolean additiveComposite;
+
     public Font font;
 
-    public StringImageConverter(@NotNull String text, Color bg, Color fg) {
+    public StringImageConverter(@NotNull String text, Color bg, Color fg, boolean additiveComposite) {
         this.text = new String[]{text};
         this.colorBG = bg == null ? new Color(0xff000000) : bg;
         this.colorFG = new Color[]{fg == null ? new Color(0xffffffff) : fg};
+        this.additiveComposite = additiveComposite;
         setup();
     }
     public StringImageConverter(@NotNull String text, boolean darkBG) {
         this.text = new String[]{text};
         this.colorBG = darkBG ? new Color(0xff000000) : new Color(0xffffffff);
         this.colorFG = new Color[]{darkBG ? new Color(0xffffffff) : new Color(0xff000000)};
+        this.additiveComposite = darkBG;
         setup();
     }
-    public StringImageConverter(@NotNull String redText, @NotNull String greenText, @NotNull String blueText) {
+    public StringImageConverter(@NotNull String redText, @NotNull String greenText, @NotNull String blueText, boolean additiveComposite) {
         this.text = new String[]{redText,greenText,blueText};
-        this.colorBG = new Color(0xff000000);
-        this.colorFG = new Color[]{new Color(0xffff0000),new Color(0xff00ff00),new Color(0xff0000ff)};
+        this.colorBG = additiveComposite ? new Color(0xff000000) : new Color(0xffffffff);
+        this.colorFG = additiveComposite ?
+                new Color[]{new Color(0xffff0000),new Color(0xff00ff00),new Color(0xff0000ff)} :
+                new Color[]{new Color(0xff00ffff),new Color(0xffff00ff),new Color(0xffffff00)};
+        this.additiveComposite = additiveComposite;
         setup();
     }
     private void setup() {
@@ -76,37 +83,56 @@ public class StringImageConverter {
         g.setColor(colorBG);
         g.fillRect(0,0,w,h);
 
-        g.setComposite(new Composite() {
-            @Override
-            public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
-                return new CompositeContext() {
-                    @Override
-                    public void dispose() {
-
-                    }
-
-                    @Override
-                    public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
-                        int[] oarr = new int[dstColorModel.getNumComponents()];
-                        int[] iarrs = new int[srcColorModel.getNumComponents()];
-                        int[] iarrd = new int[srcColorModel.getNumComponents()];
-                        for (int x = Math.max(src.getMinX(),dstIn.getMinX()); x < src.getWidth() && x < dstIn.getWidth(); x++) {
-                            for (int y = Math.max(src.getMinY(),dstIn.getMinY()); y < src.getHeight() && y < dstIn.getHeight(); y++) {
-                                try {
-                                    src.getPixel(x, y, iarrs);
-                                    dstIn.getPixel(x, y, iarrd);
-                                    for (int i = 0; i < oarr.length && i < iarrs.length; i++)
-                                        oarr[i] = Math.max(0, Math.min(255, iarrs[i] + iarrd[i]));
-                                    dstOut.setPixel(x, y, oarr);
-                                } catch (ArrayIndexOutOfBoundsException e) {
-                                    System.out.println("("+x+","+y+") OUT OF BOUNDS");
-                                }
+        if (additiveComposite)
+            g.setComposite((srcColorModel, dstColorModel, hints) -> new CompositeContext() {
+                @Override public void dispose() {}
+                @Override
+                public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+                    int[] oarr = new int[dstColorModel.getNumComponents()];
+                    int[] iarrs = new int[srcColorModel.getNumComponents()];
+                    int[] iarrd = new int[srcColorModel.getNumComponents()];
+                    outer:
+                    for (int x = Math.max(src.getMinX(), dstIn.getMinX()); x < src.getWidth() && x < dstIn.getWidth(); x++) {
+                        for (int y = Math.max(src.getMinY(), dstIn.getMinY()); y < src.getHeight() && y < dstIn.getHeight(); y++) {
+                            try {
+                                src.getPixel(x, y, iarrs);
+                                dstIn.getPixel(x, y, iarrd);
+                                for (int i = 0; i < oarr.length && i < iarrs.length; i++)
+                                    oarr[i] = Math.max(0, Math.min(255, iarrs[i] + iarrd[i]));
+                                dstOut.setPixel(x, y, oarr);
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                System.out.println("(" + x + "," + y + ") OUT OF BOUNDS");
+                                break outer;
                             }
                         }
                     }
-                };
-            }
-        });
+                }
+            });
+        else
+            g.setComposite((srcColorModel, dstColorModel, hints) -> new CompositeContext() {
+                @Override public void dispose() {}
+                @Override
+                public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+                    int[] oarr = new int[dstColorModel.getNumComponents()];
+                    int[] iarrs = new int[srcColorModel.getNumComponents()];
+                    int[] iarrd = new int[srcColorModel.getNumComponents()];
+                    outer:
+                    for (int x = Math.max(src.getMinX(), dstIn.getMinX()); x < src.getWidth() && x < dstIn.getWidth(); x++) {
+                        for (int y = Math.max(src.getMinY(), dstIn.getMinY()); y < src.getHeight() && y < dstIn.getHeight(); y++) {
+                            try {
+                                src.getPixel(x, y, iarrs);
+                                dstIn.getPixel(x, y, iarrd);
+                                for (int i = 0; i < oarr.length && i < iarrs.length; i++)
+                                    oarr[i] = Math.max(0, Math.min(255, iarrs[i] * iarrd[i] / 255));
+                                dstOut.setPixel(x, y, oarr);
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                System.out.println("(" + x + "," + y + ") OUT OF BOUNDS");
+                                break outer;
+                            }
+                        }
+                    }
+                }
+            });
 
         for (int n = 0; n < lines.size(); n++) {
             g.setColor(colorFG[n]);

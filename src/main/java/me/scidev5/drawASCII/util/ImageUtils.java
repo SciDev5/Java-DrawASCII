@@ -140,4 +140,38 @@ public class ImageUtils {
         }
         return map;
     }
+    /**
+     * Isolate a channel of an RGB map.
+     * @param rgbMap The RGB map to use.
+     * @param channel The channel to exclude (0-2: rgb)
+     * @return A 2-dimensional array of values for the specified channel.
+     */
+    public static double[][] isolateCMYMapChannel(int[][] rgbMap, int channel) {
+        double lumaMax = 1;//getLuminance(~(0xff<<(2-channel)));
+        if (rgbMap.length == 0) return new double[0][0];
+        double[][] map = new double[rgbMap.length][rgbMap[0].length];
+        for (int i = 0; i < rgbMap.length; i++) {
+            if (rgbMap[i].length != rgbMap[0].length) return new double[0][0];
+            for (int j = 0; j < rgbMap[i].length; j++) {
+                map[i][j] = 1-getLuminance(rgbMap[i][j] & ~(0xff<<(2-channel))) / lumaMax;
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Invert a scalar map.
+     * @param map The map to invert.
+     * @return 1-map
+     */
+    public static double[][] invertMap(double[][] map) {
+        if (map.length == 0) return new double[0][0];
+        double[][] invmap = new double[map.length][map[0].length];
+        for (int i = 0; i < map.length; i++) {
+            if (map[i].length != map[0].length) return new double[0][0];
+            for (int j = 0; j < map[i].length; j++)
+                invmap[i][j] = 1 - map[i][j];
+        }
+        return invmap;
+    }
 }

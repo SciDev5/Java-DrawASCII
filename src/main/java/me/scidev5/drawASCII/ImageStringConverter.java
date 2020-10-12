@@ -26,7 +26,7 @@ public class ImageStringConverter {
         this.image = image;
     }
 
-    public void setCharset(@NotNull CharInfoHumanMade[] charset) {
+    public void setCharset(@NotNull CharInfo[] charset) {
         this.charset = charset;
     }
     public void setMode(@NotNull CalculateMode mode) {
@@ -65,6 +65,7 @@ public class ImageStringConverter {
                 map = new double[][][]{ ImageUtils.toLuminanceMap(rgbaMap) };
                 break;
             case NEG_LUMINANCE:
+                map = new double[][][]{ ImageUtils.invertMap(ImageUtils.toLuminanceMap(rgbaMap)) };
                 break;
             case RGB:
                 map = new double[][][]{
@@ -74,6 +75,11 @@ public class ImageStringConverter {
                 };
                 break;
             case CMY:
+                map = new double[][][]{
+                    ImageUtils.isolateCMYMapChannel(rgbaMap,0),
+                    ImageUtils.isolateCMYMapChannel(rgbaMap,1),
+                    ImageUtils.isolateCMYMapChannel(rgbaMap,2)
+                };
                 break;
         }
 
