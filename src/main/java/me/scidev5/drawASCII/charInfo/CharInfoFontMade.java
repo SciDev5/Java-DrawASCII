@@ -6,8 +6,6 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class CharInfoFontMade implements CharInfo {
 
@@ -22,11 +20,20 @@ public class CharInfoFontMade implements CharInfo {
     }
 
 
+    /**
+     * Get the text character associated with this <code>CharInfo</code>.
+     * @return The character for this <code>CharInfo</code>
+     */
     @Override
     public char getChar() {
         return this.character;
     }
 
+    /**
+     * Test this <code>CharInfo</code> against a section of an image.
+     * @param map The section of the image to compare with.
+     * @return A score of how badly the image matches (0: perfect match; 1+: bad match)
+     */
     @Override
     public float test(double[][] map) {
         if (map.length == 0) return 0f;
@@ -41,6 +48,7 @@ public class CharInfoFontMade implements CharInfo {
         return amount > 0 ? sum/amount : Float.POSITIVE_INFINITY;
     }
 
+
     private float getRectSum(float x, float y, float w, float h) {
         int width = bitmap.length; int height = bitmap[0].length;
         x *= width; w *= width;
@@ -54,7 +62,13 @@ public class CharInfoFontMade implements CharInfo {
         return sum/amount;
     }
 
-    int cachedWidth = 0; int cachedHeight = 0;
+    private int cachedWidth = 0; private int cachedHeight = 0;
+
+    /**
+     * Cache the computed values of this <code>CharInfo</code> to a bitmap.
+     * @param w The width of the bitmap. (Should be equal to the sampleWidth of the ISC you put this into.)
+     * @param h The height of the bitmap. (Should be equal to the sampleHeight of the ISC you put this into.)
+     */
     @Override
     public void cache(int w, int h) {
         if (cachedWidth == w && cachedHeight == h) return;
@@ -65,7 +79,14 @@ public class CharInfoFontMade implements CharInfo {
                 this.cache[i][j] = scale * this.getRectSum(i/(float)w,j/(float)h,1f/w,1f/h);
     }
 
-
+    /**
+     * Build an array of <code>CharInfo</code> that can be used by an <code>ImageStringConverter</code>.
+     * @param font The <code>Font</code> object to use.
+     * @param charset An array of <code>char</code> describing what characters to calculate.
+     * @param scale A scale for the calculated values of the charset (best left at 1 unless the image comes out too bright/dark).
+     * @param densityBitmapBlend (best around 0.3) An option to blend between matching just by the shape of the char (0) or the average brightness (1).
+     * @return An array of <code>CharInfo</code> that describe the given font and given characters.
+     */
     public static CharInfo[] buildCharsetForFont(Font font, char[] charset, float scale, float densityBitmapBlend) {
         CharInfo[] charInfos = new CharInfo[charset.length];
 
@@ -114,5 +135,15 @@ public class CharInfoFontMade implements CharInfo {
         }
         draw.dispose();
         return charInfos;
+    }
+
+    /**
+     * Build an array of <code>CharInfo</code> that can be used by an <code>ImageStringConverter</code>.
+     * @param font The <code>Font</code> object to use.
+     * @param charset An array of <code>char</code> describing what characters to calculate.
+     * @return An array of <code>CharInfo</code> that describe the given font and given characters.
+     */
+    public static CharInfo[] buildCharsetForFont(Font font, char[] charset) {
+        return buildCharsetForFont(font, charset, 1, 0.3f);
     }
 }

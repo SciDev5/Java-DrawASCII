@@ -2,7 +2,6 @@ package me.scidev5.drawASCII.charInfo;
 
 public class CharInfoHumanMade implements CharInfo {
 
-    //*
     public static final CharInfoHumanMade CHAR_SPACE =      new CharInfoHumanMade(' ',0.05f);
     public static final CharInfoHumanMade CHAR_HASHTAG =    new CharInfoHumanMade('#',0.95f);
     public static final CharInfoHumanMade CHAR_MINUS =      new CharInfoHumanMade('-',0.4f,0f,0f, 1f,0f);
@@ -21,8 +20,7 @@ public class CharInfoHumanMade implements CharInfo {
                 CHAR_PLUS,          CHAR_SLASH_FWD, CHAR_SLACK_BK,  CHAR_QUOT,
                 CHAR_QUOTDOUBLE,    CHAR_BAR
         };
-    }//*/
-
+    }
 
 
     public final char character;
@@ -87,8 +85,13 @@ public class CharInfoHumanMade implements CharInfo {
         return amount > 0 ? sum/amount : Float.POSITIVE_INFINITY;
     }
 
-    int cachedWidth = 0; int cachedHeight = 0;
-    float[][] cache = null;
+    private int cachedWidth = 0; private int cachedHeight = 0;
+    private float[][] cache = null;
+    /**
+     * Cache the computed values of this <code>CharInfo</code> to a bitmap.
+     * @param w The width of the bitmap. (Should be equal to the sampleWidth of the ISC you put this into.)
+     * @param h The height of the bitmap. (Should be equal to the sampleHeight of the ISC you put this into.)
+     */
     @Override
     public void cache(int w, int h) {
         if (cachedWidth == w && cachedHeight == h) return;
@@ -99,6 +102,10 @@ public class CharInfoHumanMade implements CharInfo {
                 cache[i][j] = this.sample(i,j,w,h);
     }
 
+    /**
+     * Get the text character associated with this <code>CharInfo</code>.
+     * @return The character for this <code>CharInfo</code>
+     */
     @Override
     public char getChar() {
         return character;
@@ -113,76 +120,4 @@ public class CharInfoHumanMade implements CharInfo {
                 "), anisotropy=(" + anisotropicX + ", " + anisotropicY +
                 ")}";
     }
-
-    /*
-    public static CharInfoHumanMade[] buildCharsetInfo(Font font, char[] charset, float densityScale) {
-        CharInfoHumanMade[] charInfos = new CharInfoHumanMade[charset.length];
-        Random jitter = new Random();
-        float jitterAmount = 0.0001f;
-
-        BufferedImage dummyImg = new BufferedImage(1,1,BufferedImage.TYPE_BYTE_GRAY);
-        Graphics dummyImgGraphics = dummyImg.getGraphics();
-        dummyImgGraphics.setFont(font);
-        FontRenderContext frc = dummyImgGraphics.getFontMetrics().getFontRenderContext();
-        Rectangle2D charBounds = font.getStringBounds("*",frc);
-        dummyImgGraphics.dispose();
-
-        int w = (int) Math.ceil(charBounds.getWidth());
-        int h = (int) Math.ceil(charBounds.getHeight());
-
-        BufferedImage characterImage = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
-        Graphics draw = characterImage.getGraphics();
-        draw.setFont(font);
-        for (int i = 0; i < charset.length; i++) {
-            draw.clearRect(0,0, w, h);
-            draw.drawString(charset[i]+"",0, -(int)Math.ceil(charBounds.getY()));
-
-            double[][] light = ImageUtils.toLuminanceMap(ImageUtils.getRGBMap(characterImage,0,0, w, h),true);
-            int amount = 0;
-            float focusAmount = 0.001f;
-            float density = 0;
-            float focusX = 0;
-            float focusY = 0;
-            java.util.List<Float> xs = new ArrayList<>();
-            java.util.List<Float> ys = new ArrayList<>();
-            float anisotropyAmount = 0.001f;
-            for (int j = 0; j < light.length; j++)
-                for (int k = 0; k < light[j].length; k++) {
-                    float x = light.length > 1 ? j / (light.length - 1f) * 2 - 1 : 0;
-                    float y = light[j].length > 1 ? k / (light[j].length - 1f) * 2 - 1 : 0;
-                    double lval = light[j][k];
-                    amount++;
-                    density += lval;
-                    focusX += x*lval;
-                    focusY += y*lval;
-                    focusAmount += lval;
-                    if (lval > 0.5) {
-                        xs.add(x+(jitter.nextFloat()-0.5f)*jitterAmount);
-                        ys.add(y+(jitter.nextFloat()-0.5f)*jitterAmount);
-                        anisotropyAmount += Math.sqrt(x*x+y*y);
-                    }
-                }
-            float score = 0; float angle = 0;
-            for (float a = 0; a < Math.PI; a += 0.1) {
-                float currentScore = 0;
-                float anx = (float) Math.cos(a);
-                float any = (float) Math.sin(a);
-                for (int j = 0; j < xs.size(); j++) {
-                    currentScore += xs.get(j)*anx + ys.get(j)*any;
-                }
-                currentScore /= anisotropyAmount;
-                if (currentScore > score) {
-                    score = currentScore;
-                    angle = a;
-                }
-            }
-            float anisotropicX = (float) (Math.cos(angle)*score);
-            float anisotropicY = (float) (Math.sin(angle)*score);
-
-
-            charInfos[i] = new CharInfoHumanMade(charset[i],densityScale*density/amount,focusX/focusAmount,focusY/focusAmount,anisotropicX,anisotropicY);
-        }
-        draw.dispose();
-        return charInfos;
-    }*/
 }
